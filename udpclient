@@ -1,0 +1,43 @@
+#include<stdio.h>
+#include<netinet/in.h>
+#include<stdlib.h>
+#include<string.h>
+#include<fcntl.h>
+
+int main()
+{
+	struct sockaddr_in serv,cli;
+	int sockfd;
+	sockfd=socket(AF_INET,SOCK_DGRAM,0);
+
+	bzero(&serv,sizeof(serv));
+	if(sockfd==-1)
+	{
+		printf("socket");
+		exit(0);
+	}
+
+	serv.sin_family=AF_INET;
+	serv.sin_port=htons(4000);
+	inet_aton("localhost",&serv.sin_addr);
+	//bind(sockfd,(struct sockaddr*)&serv,sizeof(serv));
+	if(bind(sockfd,(struct sockaddr*)&serv,sizeof(serv))==-1)
+	{
+		printf("bind");
+		exit(0);
+	}
+	char recv_data[200],send_data[200];
+	int len=sizeof(cli);
+	for(;;)
+	{
+		int n=recvfrom(sockfd,recv_data,200,0,(struct sockaddr*)&cli,&len);
+		recv_data[n]='\0';
+		printf("client : %s\nme :",recv_data);
+		scanf("%s",send_data);
+		sendto(sockfd,send_data,strlen(send_data),0,(struct sockaddr*)&cli,sizeof(cli));
+		bzero(&send_data,sizeof(send_data));
+		bzero(&recv_data,sizeof(recv_data));
+	}
+	close(sockfd);
+	return 0;
+}
